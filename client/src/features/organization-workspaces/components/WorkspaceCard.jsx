@@ -1,0 +1,32 @@
+import { useNavigate } from 'react-router';
+import { FolderIcon, CaretRightIcon } from '@phosphor-icons/react';
+
+const WorkspaceCard = ({ workspace }) => {
+  const navigate = useNavigate();
+
+  return (
+    <button
+      onClick={() => navigate(`/workspace/${workspace.id}`)}
+      className="text-left border border-border hover:border-borderStrong transition-all duration-150 hover:-translate-y-px bg-white p-6"
+    >
+      <div className="flex items-start justify-between mb-4">
+        <div className="w-10 h-10 bg-surface border border-border flex items-center justify-center">
+          <FolderIcon size={20} className="text-text-primary" />
+        </div>
+        <CaretRightIcon size={16} className="text-text-secondary" />
+      </div>
+      <h3 className="text-lg font-semibold tracking-tight text-text-primary mb-1">{workspace.name}</h3>
+      
+      <div className="flex items-center gap-4 text-xs text-text-secondary">
+        <span>{workspace.folders} folders</span>
+        <span>•</span>
+        <span>{workspace.documents} docs</span>
+      </div>
+      <div className="mt-4 pt-4 border-t border-border">
+        <span className="text-xs text-text-secondary">Updated {workspace.updatedAt}</span>
+      </div>
+    </button>
+  );
+};
+
+export default WorkspaceCard;

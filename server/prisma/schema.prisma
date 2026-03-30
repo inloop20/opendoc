@@ -1,0 +1,100 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                  String               @id @default(uuid())
+  username            String                @unique
+  email               String               @unique
+  password            String
+  created_at          DateTime             @default(now())
+  updated_at          DateTime             @updatedAt
+  comments            Comment[]
+  organization_member OrganizationMember[]
+  workspace_member    WorkspaceMember[]
+}
+
+model Organization {
+  id                  String               @id @default(uuid())
+  name                String               @unique
+  created_at          DateTime             @default(now())
+  updated_at          DateTime             @updatedAt
+  organization_member OrganizationMember[]
+  workspace           Workspace[]
+}
+
+model OrganizationMember {
+  userId         String
+  organizationId String
+  role           String 
+  organization   Organization @relation(fields: [organizationId], references: [id],onDelete:Cascade)
+  user           User         @relation(fields: [userId], references: [id],onDelete: Cascade)
+
+  @@id([userId, organizationId])
+}
+
+model Workspace {
+  id               String            @id @default(uuid())
+  name             String
+  organizationId   String
+  created_at       DateTime          @default(now())
+  updated_at       DateTime          @updatedAt
+  folders          Folder[]
+  organization     Organization      @relation(fields: [organizationId], references: [id],onDelete: Cascade)
+  workspace_member WorkspaceMember[]
+  @@unique([organizationId,name])
+}
+
+model WorkspaceMember {
+  userId      String
+  workspaceId String
+  role        String
+  user        User      @relation(fields: [userId], references: [id],onDelete: Cascade)
+  workspace   Workspace @relation(fields: [workspaceId], references: [id],onDelete: Cascade)
+
+  @@id([userId, workspaceId])
+}
+
+
+model Folder {
+  id             String     @id @default(uuid())
+  name           String
+  parentFolderId String?
+  workspaceId    String
+  created_at     DateTime   @default(now())
+  updated_at     DateTime   @updatedAt
+  documents      Document[]
+  parentFolder   Folder?    @relation("FolderChildren", fields: [parentFolderId], references: [id],onDelete: Cascade)
+  subfolders     Folder[]   @relation("FolderChildren")
+  workspace      Workspace  @relation(fields: [workspaceId], references: [id],onDelete: Cascade)
+  @@unique([workspaceId, parentFolderId, name])
+ 
+}
+
+model Document {
+  id         String    @id @default(uuid())
+  title      String
+  content    String
+  folderId   String
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  comments   Comment[]
+  folder     Folder    @relation(fields: [folderId], references: [id],onDelete: Cascade)
+  @@unique([folderId,title])
+}
+
+model Comment {
+  id         String   @id @default(uuid())
+  content    String
+  authorId   String
+  documentId String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  author     User     @relation(fields: [authorId], references: [id],onDelete: Cascade)
+  document   Document @relation(fields: [documentId], references: [id],onDelete: Cascade)
+}

@@ -1,0 +1,9 @@
+{
+  "name": "opendoc-root",
+  "private": true,
+  "workspaces": [
+    "client",
+    "server",
+    "shared"
+  ]
+}
