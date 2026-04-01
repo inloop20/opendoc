@@ -1,13 +1,40 @@
 import { useNavigate } from 'react-router';
 import { PlusIcon, UserPlusIcon, GearIcon } from '@phosphor-icons/react';
+import { useEffect, useState } from 'react';
+import CreateOrgModal from './CreateOrgModal';
+import InviteModal from './InviteModal';
+import { orgApi } from '../services/orgApi';
+import OrgSettingsModal from './OrgSettingModal';
+import ErrorBanner from '../../../components/ui/ErrorBanner'; 
 
-const OrganizationsTab = ({ onCreateOrg, onInvite }) => {
+const OrganizationsTab = () => {
   const navigate = useNavigate();
 
-  const organizations = [
-    { id: 1, name: 'Acme Corp', role: 'Owner', members: 12 },
-    { id: 2, name: 'Design Studio', role: 'Admin', members: 8 }
-  ];
+  const [showCreateOrgModal, setShowCreateOrgModal] = useState(false);
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [selectedOrg, setSelectedOrg] = useState(null);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [orgs, setOrgs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [apiError, setApiError] = useState(""); 
+
+  useEffect(() => {
+    const gc = async () => {
+      setApiError("");
+      try {
+        const org = await orgApi.getUserOrgs();
+        console.log(org.data);
+        setOrgs(org.data);
+      } catch (error) {
+        const message = error.response?.data?.message || error.message;
+        console.log(message);
+        setApiError(message || "Failed to load organizations. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    gc();
+  }, []);
 
   return (
     <div>
@@ -21,70 +48,105 @@ const OrganizationsTab = ({ onCreateOrg, onInvite }) => {
           </p>
         </div>
         <button
-          data-testid="create-organization-button"
-          onClick={onCreateOrg}
-          className="flex items-center gap-2 px-6 py-3 bg-primary text-white font-bold text-xs uppercase tracking-[0.2em] hover:bg-primary-hover transition-colors duration-150"
+          onClick={() => setShowCreateOrgModal(true)}
+          className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white text-xs font-semibold uppercase tracking-wider hover:bg-primary-hover transition"
         >
           <PlusIcon size={16} weight="bold" />
           New Organization
         </button>
       </div>
+      {apiError && (
+        <ErrorBanner 
+          message={apiError} 
+          onClose={() => setApiError("")} 
+        />
+      )}
 
       <div className="space-y-4">
-        {organizations.map((org) => (
-          /* 1. Changed outer container from <div> to <button> */
-          <button
-            key={org.id}
-            data-testid={`organization-card-${org.id}`}
-            onClick={() => navigate(`/organizations/${org.id}`)}
-            className="w-full text-left border border-border p-6 bg-white hover:border-borderStrong hover:-translate-y-0.5 transition-all duration-150 cursor-pointer group"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-primary flex items-center justify-center transition-colors duration-150 group-hover:bg-primary-hover">
-                  <span className="text-lg font-black text-white">
-                    {org.name.charAt(0)}
-                  </span>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold tracking-tight text-text-primary group-hover:text-primary transition-colors duration-150">
-                    {org.name}
-                  </h3>
-                  <p className="text-xs text-text-secondary mt-1">
-                    {org.role} • {org.members} members
-                  </p>
-                </div>
-              </div>
+        {loading ? (
+          <p className="text-sm text-text-secondary">Loading organizations...</p>
+        ) : orgs.length === 0 && !apiError ? (
+          <div className="text-center py-10 border border-dashed border-border">
+            <p className="text-sm text-text-secondary mb-4">
+              No organizations yet
+            </p>
+            <button
+              onClick={() => setShowCreateOrgModal(true)}
+              className="text-primary text-sm font-semibold hover:underline"
+            >
+              Create your first organization
+            </button>
+          </div>
+        ) : (
+          orgs.map((org) => (
+            <div
+              key={org.id}
+              onClick={() => navigate(`/organizations/${org?.id}`)}
+              className="p-5 border border-border bg-white hover:border-borderStrong hover:shadow-sm transition cursor-pointer group"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-11 h-11 bg-primary flex items-center justify-center text-white font-bold text-lg">
+                    {org?.name?.charAt(0)}
+                  </div>
 
-              <div className="flex items-center gap-2">
-                {/* 2. Added e.stopPropagation() to prevent card click */}
-                <button
-                  data-testid={`invite-members-button-${org.id}`}
-                  onClick={(e) => {
-                    e.stopPropagation(); 
-                    onInvite();
-                  }}
-                  className="flex items-center gap-2 px-4 py-2 border border-border bg-white hover:bg-surface text-xs font-semibold text-text-primary transition-colors duration-150"
-                >
-                  <UserPlusIcon size={16} />
-                  Invite
-                </button>
-                
-                {/* 3. Added e.stopPropagation() here as well */}
-                <button
-                  data-testid={`manage-org-button-${org.id}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    // Optional: navigate(`/organizations/${org.id}/settings`)
-                  }}
-                  className="p-2 border border-transparent hover:border-border hover:bg-surface transition-colors duration-150"
-                >
-                  <GearIcon size={20} className="text-text-secondary" />
-                </button>
+                  <div>
+                    <h3 className="text-base font-semibold text-text-primary group-hover:text-primary transition">
+                      {org?.name}
+                    </h3>
+                    <p className="text-xs text-text-secondary mt-1">
+                      {org?.role} • {org?.memberCount} members
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedOrg(org);
+                      setShowInviteModal(true);
+                    }}
+                    className="flex items-center gap-2 px-3 py-1.5 border border-border text-xs font-medium hover:bg-surface transition"
+                  >
+                    <UserPlusIcon size={16} />
+                    Invite
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      setSelectedOrg(org);
+                      setShowSettingsModal(true);
+                    }}
+                    className="p-2 hover:bg-surface border border-transparent hover:border-border transition"
+                  >
+                    <GearIcon size={18} className="text-text-secondary" />
+                  </button>
+                </div>
               </div>
             </div>
-          </button>
-        ))}
+          ))
+        )}
+        <CreateOrgModal
+          isOpen={showCreateOrgModal}
+          onClose={() => setShowCreateOrgModal(false)}
+            setOrgs={setOrgs}
+        />
+        <InviteModal
+          isOpen={showInviteModal}
+          onClose={() => setShowInviteModal(false)}
+          organization={selectedOrg}
+        />       
+        <OrgSettingsModal
+          isOpen={showSettingsModal}
+          onClose={() => {
+            setShowSettingsModal(false);
+            setSelectedOrg(null);          
+          }}
+          setOrgs={setOrgs}
+          organization={selectedOrg}
+        />
       </div>
     </div>
   );

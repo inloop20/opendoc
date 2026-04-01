@@ -133,8 +133,6 @@ export const addMember = asyncHandler(async (req, res) => {
 
 export const getMembers = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  console.log(id);
-  
   if (!id) throw new ApiError("workspace id is required", 400);
  const members = await prisma.workspaceMember.findMany({where:{
   workspaceId:id

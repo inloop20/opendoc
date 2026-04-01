@@ -87,7 +87,7 @@ export const getUserWorkSpace = asyncHandler(async (req, res) => {
 export const getUserOrganizations = asyncHandler(async (req, res) => {
   const { id } = req.user;
 
-  const organizations = await prisma.organizationMember.findMany({
+  const memberships = await prisma.organizationMember.findMany({
     where: {
       userId: id,
     },select: {
@@ -97,10 +97,18 @@ export const getUserOrganizations = asyncHandler(async (req, res) => {
           id: true,
           name: true,
           created_at: true,
+          _count:{select:{organization_member:true}}
         },
       },
     },
   });
+   const organizations = memberships.map(m => ({
+    id: m.organization.id,
+    name: m.organization.name,
+    created_at: m.organization.created_at,
+    memberCount: m.organization._count.organization_member,
+    role: m.role,
+  }));
   return res
     .status(200)
     .json(new ApiResponse(200, "organizations fetched", organizations));

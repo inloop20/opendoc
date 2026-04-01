@@ -105,7 +105,7 @@ export const updateOrganization = asyncHandler(async (req, res) => {
   const { name } = req.body;
   const updatedOrg = await prisma.organization.update({
     where: { id },
-    data: { name },
+    data: { name:name.trim() },
     select: { id: true, name: true },
   });
   return res.status(200).json(new ApiResponse(200, "name updated", updatedOrg));

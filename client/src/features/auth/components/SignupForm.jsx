@@ -27,8 +27,6 @@ const SignupForm = () => {
       await login(data.email, data.password);
       navigate('/dashboard'); 
     } catch (err) {
-      console.log('Auth chain failed:', err);
-      
       setError('root', { 
         type: 'manual', 
         message: err.message || 'An error occurred during account setup.' 

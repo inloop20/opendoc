@@ -5,7 +5,7 @@ import React from 'react';
 import { AuthContext } from '../../auth/context/AuthContext';
 
 const DashboardHeader = React.memo(({ }) => {
-  const [searchQuery,setSearchQuery] = useState('')
+  const [searchQuery,setSearchQuery] = useState('');
   const {user,loading,logout} = useContext(AuthContext)
   if(loading) return <div>loading</div>
 

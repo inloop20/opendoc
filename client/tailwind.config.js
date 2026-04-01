@@ -101,4 +101,3 @@ export default{
  
   plugins: [],
 };
-console.log("TAILWIND CONFIG LOADED");

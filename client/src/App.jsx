@@ -14,11 +14,8 @@ const AuthRoute = () => {
   const { user, isLoading } = useContext(AuthContext);
   
   if (isLoading) return <div>Loading...</div>;
-  console.log('here');
   
-  if (user) {
-    console.log('user');
-    
+  if (user) {    
     return <Navigate to="/dashboard" replace/>;
 
   }
@@ -30,10 +27,7 @@ function App() {
     <div className="App">
         <BrowserRouter>
           <Routes>
-            
             <Route path="/" element={<AuthRoute />} />
-            
-           
             <Route 
               path="/organizations/:orgId" 
               element={

@@ -1,10 +1,9 @@
 const InviteModal = ({ isOpen, onClose }) => {
-  // If the modal isn't flagged as open, don't render anything
   if (!isOpen) return null;
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Handle invite submissions here (e.g., API calls)
+
     onClose();
   };
 
@@ -19,7 +18,6 @@ const InviteModal = ({ isOpen, onClose }) => {
           </h2>
         </div>
 
-        {/* Modal Body / Form */}
         <form onSubmit={handleSubmit}>
           <div className="p-6 space-y-4">
             <div>
@@ -53,7 +51,6 @@ const InviteModal = ({ isOpen, onClose }) => {
             </div>
           </div>
 
-          {/* Modal Footer / Actions */}
           <div className="border-t border-border p-6 flex gap-3 justify-end">
             <button
               data-testid="cancel-invite-button"
