@@ -5,14 +5,14 @@ import {
   orgCreateSchema,
   UpdateMemberRoleSchema,
 } from "../../../shared/index.js";
-import { addUser, createOrganization, deleteOrganization, getOrganizationById, getOrganizationMembers, removeMember, updateMemberRole, updateOrganization } from '../controllers/organization.controller.js';
+import { addUsers, createOrganization, deleteOrganization, getOrganizationById, getOrganizationMembers, removeMember, updateMemberRole, updateOrganization } from '../controllers/organization.controller.js';
 import { checkPermission } from "../middleware/authz.middleware.js";
 
 const organizationRouter = express.Router();
 
 organizationRouter.post('/', validate(orgCreateSchema), createOrganization);
 
-organizationRouter.post("/:id/members",validate(AddUserBodySchema),checkPermission("admin", "organization", "id"),addUser);
+organizationRouter.post("/:id/members",validate(AddUserBodySchema),checkPermission("admin", "organization", "id"),addUsers);
 
 organizationRouter.get("/:id/members",checkPermission("member", "organization", "id"),getOrganizationMembers);
 

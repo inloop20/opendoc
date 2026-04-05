@@ -3,6 +3,7 @@ import asyncHandler from "../utils/asyncHandler.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import fgaClient from "../config/openfga.js";
+import { WriteRequestWritesOnDuplicate } from "@openfga/sdk";
 
 export const createOrganization = asyncHandler(async (req, res) => {
   const { name } = req.body;
@@ -53,25 +54,76 @@ export const getOrganizationById = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, "organization fetched", organization));
 });
 
-export const addUser = asyncHandler(async (req, res) => {
+export const addUsers = asyncHandler(async (req, res) => {
   const id = req.params.id;
-  const { userId } = req.body;
+  const { emails } = req.body;
   if (!id) throw new ApiError("organization id is required", 400);
 
-  const userJoined = await prisma.organizationMember.create({
-    data: {
-      organizationId: id,
-      userId: userId,
-      role:'member'
+  const users = await prisma.user.findMany({
+    where: {
+      email: { in: emails }
     },
-    select: { organizationId: true, userId: true },
+    select: { id: true, email: true }
   });
 
-  await fgaClient.write({
-    writes: [{ user: `user:${userId}`, relation: 'member', object: `organization:${id}` }]
+  const foundEmails = users.map(user => user.email);
+  const nonExistentEmails = emails.filter(email => !foundEmails.includes(email));
+
+  if (users.length === 0) {
+    return res.status(200).json(
+      new ApiResponse(200, "No users were added.", {
+        addedCount: 0,
+        nonExistentEmails,
+        alreadyMembers: []
+      })
+    );
+  }
+
+  const userIds = users.map(user => user.id);
+
+  const memberData = userIds.map(userId => ({
+    organizationId: id,
+    userId: userId,
+    role: 'member'
+  }));
+
+ const createdMembers= await prisma.organizationMember.createManyAndReturn({
+    data: memberData,
+    skipDuplicates: true
   });
 
-  return res.status(201).json(new ApiResponse(201, "user joined", userJoined));
+  const successfullyAddedUserIds = createdMembers.map(m => m.userId);
+  const alreadyMembers = users
+    .filter(u => !successfullyAddedUserIds.includes(u.id))
+    .map(u => u.email);
+
+    if (successfullyAddedUserIds.length > 0) {
+    const fgaWrites = successfullyAddedUserIds.map(userId => ({
+      user: `user:${userId}`,
+      relation: 'member',
+      object: `organization:${id}`
+    }))
+    await fgaClient.write({
+      writes: fgaWrites
+    },{
+      conflict:{
+        onDuplicateWrites:WriteRequestWritesOnDuplicate.Ignore
+      }
+    });
+  }
+
+
+ return res.status(201).json(
+    new ApiResponse(
+      201, 
+      `${createdMembers.length} user(s) added successfully.`, 
+      {
+        addedCount:createdMembers.length,
+        nonExistentEmails: nonExistentEmails.length > 0 ? nonExistentEmails : undefined,
+        alreadyMembers: alreadyMembers.length > 0 ? alreadyMembers : undefined
+      }
+    )
+  );
 });
 
 export const getOrganizationMembers = asyncHandler(async (req, res) => {

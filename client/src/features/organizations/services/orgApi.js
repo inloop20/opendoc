@@ -16,4 +16,8 @@ export const orgApi ={
         return await apiClient.delete(`/organizations/${id}`);
     },
 
+    addUsers: async(id,emails)=>{
+        return await apiClient.post(`organizations/${id}/members`,{emails})
+    }
+
 };

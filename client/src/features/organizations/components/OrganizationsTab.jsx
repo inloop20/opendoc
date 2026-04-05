@@ -23,11 +23,10 @@ const OrganizationsTab = () => {
       setApiError("");
       try {
         const org = await orgApi.getUserOrgs();
-        console.log(org.data);
         setOrgs(org.data);
       } catch (error) {
+        console.log(message)
         const message = error.response?.data?.message || error.message;
-        console.log(message);
         setApiError(message || "Failed to load organizations. Please try again.");
       } finally {
         setLoading(false);
@@ -100,20 +99,23 @@ const OrganizationsTab = () => {
                   </div>
                 </div>
 
+                 {org?.role === 'admin' && (
                 <div className="flex items-center gap-2">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedOrg(org);
-                      setShowInviteModal(true);
+                 
+                    
+                   <button
+                   onClick={(e) => {
+                     e.stopPropagation();
+                     setSelectedOrg(org);
+                     setShowInviteModal(true);
                     }}
                     className="flex items-center gap-2 px-3 py-1.5 border border-border text-xs font-medium hover:bg-surface transition"
-                  >
+                    >
                     <UserPlusIcon size={16} />
-                    Invite
+                    Add
                   </button>
                   <button
-                    onClick={(e) => {
+                  onClick={(e) => {
                       e.stopPropagation();
                       e.preventDefault();
                       setSelectedOrg(org);
@@ -123,7 +125,9 @@ const OrganizationsTab = () => {
                   >
                     <GearIcon size={18} className="text-text-secondary" />
                   </button>
+                
                 </div>
+              )}
               </div>
             </div>
           ))
@@ -136,7 +140,7 @@ const OrganizationsTab = () => {
         <InviteModal
           isOpen={showInviteModal}
           onClose={() => setShowInviteModal(false)}
-          organization={selectedOrg}
+          orgId={selectedOrg?.id}
         />       
         <OrgSettingsModal
           isOpen={showSettingsModal}
