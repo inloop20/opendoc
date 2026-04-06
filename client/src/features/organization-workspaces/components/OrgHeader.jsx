@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router';
-import { CaretRightIcon, MagnifyingGlass, PlusIcon } from '@phosphor-icons/react';
+import { CaretRightIcon, MagnifyingGlassIcon, PlusIcon } from '@phosphor-icons/react';
 
 const OrgHeader = ({ orgName, searchQuery, onSearchChange }) => {
   const navigate = useNavigate();
@@ -12,7 +12,6 @@ const OrgHeader = ({ orgName, searchQuery, onSearchChange }) => {
   return (
     <header className="border-b border-border">
       <div className="px-8 py-4">
-        {/* Breadcrumbs */}
         <div className="flex items-center gap-2 mb-4">
           {breadcrumbs.map((crumb, index) => (
             <div key={index} className="flex items-center gap-2">
@@ -31,10 +30,9 @@ const OrgHeader = ({ orgName, searchQuery, onSearchChange }) => {
           ))}
         </div>
 
-        {/* Search and Action Bar */}
         <div className="flex items-center justify-between">
           <div className="relative">
-            <MagnifyingGlass size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
+            <MagnifyingGlassIcon size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
             <input
               type="text"
               placeholder="Search workspaces..."

@@ -1,21 +1,37 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
-
-// Component Imports
 import OrgSidebar from '../features/organization-workspaces/components/OrgSidebar';
 import OrgHeader from '../features/organization-workspaces/components/OrgHeader';
 import WorkspaceGrid from '../features/organization-workspaces/components/WorkspaceGrid';
+import {orgWorkspaceApi} from '../features/organization-workspaces/services/orgWorkspaceApi'
+import ErrorBanner from '../components/ui/ErrorBanner'; 
 
-const OrganizationWorkspaces = ({ onLogout }) => {
+const OrganizationWorkspaces = () => {
   const { orgId } = useParams(); 
   const [searchQuery, setSearchQuery] = useState('');
+  const [organization,setOrganization] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [apiError, setApiError] = useState(""); 
 
-  // Simulated DB Query
-  const organization = {
-    id: orgId,
-    name: orgId === '1' ? 'Acme Corp' : 'Design Studio',
-    members: 12
-  };
+  useEffect(()=>{
+    const getOrg = async()=>{
+      setLoading(true);
+    setApiError("");
+     try {
+       const org = await orgWorkspaceApi.getOrgById(orgId);
+       console.log(org.data.canCreateWorkspace);
+       
+       setOrganization(org.data)
+     } catch (error) {
+      console.log(error);
+      const message = error.response?.data?.message || error.message;
+      setApiError(message || "Failed to load organizations. Please try again.");
+     }finally{
+      setLoading(false)
+     }
+    }
+    getOrg();
+  },[orgId])
 
   const allWorkspaces = [
     { id: 1, name: 'Product Documentation', orgId: '1', folders: 8, documents: 24, updatedAt: '2 hours ago' },
@@ -24,27 +40,32 @@ const OrganizationWorkspaces = ({ onLogout }) => {
   ];
 
   const orgWorkspaces = allWorkspaces.filter(ws => ws.orgId === orgId);
+  if(loading) return <div>...loading</div>
 
   return (
+    
     <div className="min-h-screen bg-white flex">
-      {/* 1. Sidebar */}
       <OrgSidebar 
         organization={organization}
-        orgId={orgId}
-        onLogout={onLogout}
       />
-
-      <div className="flex-1 flex flex-col">
-        {/* 2. Header */}
+      
+      <div className="flex-1 flex flex-col h-screen overflow-hidden">
+        {apiError && (
+    <div className="border-b border-red-100">
+       <ErrorBanner 
+         message={apiError} 
+         onClose={() => setApiError("")} 
+       />
+    </div>
+  )}
         <OrgHeader 
-          orgName={organization.name}
+          orgName={organization?.name}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
         />
-
-        {/* 3. Main Workspace Grid */}
+        
         <main className="flex-1 p-8 overflow-y-auto">
-          <WorkspaceGrid workspaces={orgWorkspaces} />
+          <WorkspaceGrid workspaces={orgWorkspaces} canCreateWorkspace={organization?.canCreateWorkspace} />
         </main>
       </div>
     </div>

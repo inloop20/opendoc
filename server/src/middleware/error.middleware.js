@@ -28,6 +28,12 @@ const errorHandler = (err, req, res, next) => {
                 message = `unkown Error: ${err.code}`;
         }
     }
+    console.log(err);
+    
+    if (err?.code && err.code.includes('ECONNREFUSED')) {
+        statusCode = 500;
+        message = "Internal server error.";
+}
 
     return res.status(statusCode).json({
         success: false,

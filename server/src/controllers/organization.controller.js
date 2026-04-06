@@ -43,6 +43,7 @@ export const getOrganizationById = asyncHandler(async (req, res) => {
     select: {
       id: true,
       name: true,
+      _count:{select:{organization_member:true}}
     },
   });
 
@@ -51,7 +52,7 @@ export const getOrganizationById = asyncHandler(async (req, res) => {
   }
   return res
     .status(200)
-    .json(new ApiResponse(200, "organization fetched", organization));
+    .json(new ApiResponse(200, "organization fetched", {...organization,canCreateWorkspace:req.permission}));
 });
 
 export const addUsers = asyncHandler(async (req, res) => {

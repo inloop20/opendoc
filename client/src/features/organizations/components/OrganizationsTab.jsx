@@ -25,7 +25,6 @@ const OrganizationsTab = () => {
         const org = await orgApi.getUserOrgs();
         setOrgs(org.data);
       } catch (error) {
-        console.log(message)
         const message = error.response?.data?.message || error.message;
         setApiError(message || "Failed to load organizations. Please try again.");
       } finally {
@@ -141,6 +140,7 @@ const OrganizationsTab = () => {
           isOpen={showInviteModal}
           onClose={() => setShowInviteModal(false)}
           orgId={selectedOrg?.id}
+          setOrgs={setOrgs}
         />       
         <OrgSettingsModal
           isOpen={showSettingsModal}

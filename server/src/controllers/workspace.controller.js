@@ -40,14 +40,21 @@ export const createWorkspace = asyncHandler(async (req, res) => {
 export const getMyWorkspaces = asyncHandler(async (req, res) => {
   const { orgId } = req.params;
   if (!orgId) throw new ApiError("invalid organization id", 400);
+
+  const { objects } = await fgaClient.listObjects({
+    user: `user:${req.user.id}`,
+    relation: 'member', 
+    type: 'workspace',
+    contextual_tuples: [
+      { user: `workspace:*`, relation: 'parent', object: `organization:${orgId}` }
+    ]
+  });
+
+  const authorizedIds = objects.map(obj => obj.split(':')[1]);
   const workspaces = await prisma.workspace.findMany({
     where: {
-      organizationId: orgId,
-      workspace_member: {
-        some: {
-          userId:req.user.id,
-        },
-      },
+      id: { in: authorizedIds },
+      organizationId: orgId 
     },
     select: {
       id: true,

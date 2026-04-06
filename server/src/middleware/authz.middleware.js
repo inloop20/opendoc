@@ -15,6 +15,7 @@ const checkPermission = (relation, objectType, paramName) => {
       if (!allowed) {
         throw new ApiError('Unauthorized access',403);
       }
+      req.permission = allowed;
 
       next();
     } catch (error) {

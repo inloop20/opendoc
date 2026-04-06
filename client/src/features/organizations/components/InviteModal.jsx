@@ -6,7 +6,7 @@ import { orgApi } from '../services/orgApi'
 import ErrorBanner from '../../../components/ui/ErrorBanner'; 
 import { InviteStatusAlerts } from './InviteStatusAlert';
 
-const InviteModal = ({ isOpen, onClose, orgId }) => {
+const InviteModal = ({ isOpen, onClose, orgId, setOrgs }) => {
   const [inviteSummary, setInviteSummary] = useState(null);
 
   const {
@@ -36,6 +36,17 @@ const InviteModal = ({ isOpen, onClose, orgId }) => {
       console.log(response);
       
       const { addedCount, nonExistentEmails = [], alreadyMembers = [] } = response.data;
+      setOrgs((prevOrgs) => 
+       prevOrgs.map((org) => {
+        if (org.id === orgId) {
+          return {
+            ...org,
+            memberCount: (org.memberCount || 0) + addedCount
+          };
+        }
+        return org;
+      })
+);      
 
       if (nonExistentEmails.length === 0 && alreadyMembers.length === 0) {
         reset();
