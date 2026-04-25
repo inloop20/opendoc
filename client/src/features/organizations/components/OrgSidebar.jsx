@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router';
-import { FolderIcon, GearIcon } from '@phosphor-icons/react';
+import { FolderIcon, GearIcon, UsersIcon } from '@phosphor-icons/react';
 import Sidebar from '../../../components/ui/Sidebar';
 
 const OrgSidebar = ({ organization }) => {
@@ -12,12 +12,16 @@ const OrgSidebar = ({ organization }) => {
           <FolderIcon size={16} />
           Workspaces
         </button>
-        <button
-          onClick={() => navigate(`/organizations/${organization.id}/settings`)}
-          className="w-full flex items-center gap-2 px-3 py-2 text-sm text-text-primary hover:bg-surfaceHover transition-colors duration-150 mt-1"
+       <button
+          onClick={() => navigate(`/organizations/${organization?.id}/settings`)}
+          className="w-full flex items-center justify-between px-3 py-2 text-sm text-text-primary hover:bg-surface-secondary rounded-lg transition-colors mt-1 group cursor-pointer"
         >
-          <GearIcon size={16} />
-          Settings & Members
+          <div className="flex items-center gap-2">
+            <GearIcon size={16} /> 
+            <span>Settings & Members</span>
+          </div>
+          
+          
         </button>
     </Sidebar>
   );

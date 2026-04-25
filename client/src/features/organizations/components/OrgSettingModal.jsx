@@ -11,7 +11,8 @@ const OrgSettingsModal = ({ isOpen, onClose, organization,setOrgs }) => {
   const [apiError, setApiError] = useState(""); 
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  
+
+  const { permissions, loading: permLoading } = useOrgPermissions(orgId)
   const {
     register,
     handleSubmit,
@@ -40,8 +41,6 @@ const OrgSettingsModal = ({ isOpen, onClose, organization,setOrgs }) => {
       onClose();
     } catch (error) {
       const message = error.response?.data?.message || error.message;
-      console.log(message);
-      
       if (message?.toLowerCase().includes("name")) {
         setError("name", { type: "server", message });
       } else {

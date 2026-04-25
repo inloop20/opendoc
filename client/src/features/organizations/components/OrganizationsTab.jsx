@@ -2,18 +2,13 @@ import { useNavigate } from 'react-router';
 import { PlusIcon, UserPlusIcon, GearIcon } from '@phosphor-icons/react';
 import { useEffect, useState } from 'react';
 import CreateOrgModal from './CreateOrgModal';
-import InviteModal from './InviteModal';
 import { orgApi } from '../services/orgApi';
-import OrgSettingsModal from './OrgSettingModal';
 import ErrorBanner from '../../../components/ui/ErrorBanner'; 
 
 const OrganizationsTab = () => {
   const navigate = useNavigate();
 
   const [showCreateOrgModal, setShowCreateOrgModal] = useState(false);
-  const [showInviteModal, setShowInviteModal] = useState(false);
-  const [selectedOrg, setSelectedOrg] = useState(null);
-  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [orgs, setOrgs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [apiError, setApiError] = useState(""); 
@@ -97,36 +92,6 @@ const OrganizationsTab = () => {
                     </p>
                   </div>
                 </div>
-
-                 {org?.role === 'admin' && (
-                <div className="flex items-center gap-2">
-                 
-                    
-                   <button
-                   onClick={(e) => {
-                     e.stopPropagation();
-                     setSelectedOrg(org);
-                     setShowInviteModal(true);
-                    }}
-                    className="flex items-center gap-2 px-3 py-1.5 border border-border text-xs font-medium hover:bg-surface transition"
-                    >
-                    <UserPlusIcon size={16} />
-                    Add
-                  </button>
-                  <button
-                  onClick={(e) => {
-                      e.stopPropagation();
-                      e.preventDefault();
-                      setSelectedOrg(org);
-                      setShowSettingsModal(true);
-                    }}
-                    className="p-2 hover:bg-surface border border-transparent hover:border-border transition"
-                  >
-                    <GearIcon size={18} className="text-text-secondary" />
-                  </button>
-                
-                </div>
-              )}
               </div>
             </div>
           ))
@@ -135,21 +100,6 @@ const OrganizationsTab = () => {
           isOpen={showCreateOrgModal}
           onClose={() => setShowCreateOrgModal(false)}
             setOrgs={setOrgs}
-        />
-        <InviteModal
-          isOpen={showInviteModal}
-          onClose={() => setShowInviteModal(false)}
-          orgId={selectedOrg?.id}
-          setOrgs={setOrgs}
-        />       
-        <OrgSettingsModal
-          isOpen={showSettingsModal}
-          onClose={() => {
-            setShowSettingsModal(false);
-            setSelectedOrg(null);          
-          }}
-          setOrgs={setOrgs}
-          organization={selectedOrg}
         />
       </div>
     </div>

@@ -59,6 +59,12 @@ export const getMyWorkspaces = asyncHandler(async (req, res) => {
     select: {
       id: true,
       name: true,
+      updated_at:true,
+      _count:{
+        select:{
+          folders:true,
+        }
+      }
     },
   });
   return res

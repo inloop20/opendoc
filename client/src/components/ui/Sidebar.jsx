@@ -7,8 +7,7 @@ const Sidebar = ({ headerLabel, headerTitle, headerSubtitle,memberCount, childre
 
   const navigate = useNavigate();
    const {user,loading,logout} = useContext(AuthContext);
-   console.log(user);
-   
+
    const handleLogout = async()=>{
     await logout();
   }

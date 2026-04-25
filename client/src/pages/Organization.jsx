@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
-import OrgSidebar from '../features/organization-workspaces/components/OrgSidebar';
-import OrgHeader from '../features/organization-workspaces/components/OrgHeader';
-import WorkspaceGrid from '../features/organization-workspaces/components/WorkspaceGrid';
-import {orgWorkspaceApi} from '../features/organization-workspaces/services/orgWorkspaceApi'
+import OrgSidebar from '../features/organizations/components/OrgSidebar';
+import OrgHeader from '../features/organizations/components/OrgHeader';
+import WorkspaceGrid from '../features/organizations/components/workspace/WorkspaceGrid';
+import {orgWorkspaceApi} from '../features/organizations/services/orgWorkspaceApi'
 import ErrorBanner from '../components/ui/ErrorBanner'; 
 
-const OrganizationWorkspaces = () => {
+const Organization = () => {
   const { orgId } = useParams(); 
   const [searchQuery, setSearchQuery] = useState('');
   const [organization,setOrganization] = useState(null);
@@ -18,12 +18,9 @@ const OrganizationWorkspaces = () => {
       setLoading(true);
     setApiError("");
      try {
-       const org = await orgWorkspaceApi.getOrgById(orgId);
-       console.log(org.data.canCreateWorkspace);
-       
+       const org = await orgWorkspaceApi.getOrgById(orgId);     
        setOrganization(org.data)
      } catch (error) {
-      console.log(error);
       const message = error.response?.data?.message || error.message;
       setApiError(message || "Failed to load organizations. Please try again.");
      }finally{
@@ -33,13 +30,8 @@ const OrganizationWorkspaces = () => {
     getOrg();
   },[orgId])
 
-  const allWorkspaces = [
-    { id: 1, name: 'Product Documentation', orgId: '1', folders: 8, documents: 24, updatedAt: '2 hours ago' },
-    { id: 2, name: 'Marketing Materials', orgId: '1', folders: 5, documents: 15, updatedAt: '1 day ago' },
-    { id: 3, name: 'Client Projects', orgId: '2', folders: 12, documents: 48, updatedAt: '3 hours ago' }
-  ];
 
-  const orgWorkspaces = allWorkspaces.filter(ws => ws.orgId === orgId);
+
   if(loading) return <div>...loading</div>
 
   return (
@@ -65,11 +57,11 @@ const OrganizationWorkspaces = () => {
         />
         
         <main className="flex-1 p-8 overflow-y-auto">
-          <WorkspaceGrid workspaces={orgWorkspaces} canCreateWorkspace={organization?.canCreateWorkspace} />
+          <WorkspaceGrid />
         </main>
       </div>
     </div>
   );
 };
 
-export default OrganizationWorkspaces;
+export default Organization;

@@ -5,10 +5,11 @@ import Auth from './pages/Auth';
 import Dashboard from './pages/Dashboard';
 import Workspace from './pages/Workspace';
 import DocumentEditor from './pages/DocumentEditor';
-import OrganizationWorkspaces from './pages/OrganizationWorkspaces';
+import OrganizationWorkspaces from './pages/Organization';
 
 import ProtectedRoute from './components/ProtectedRoute'; 
 import { AuthContext } from './features/auth/context/AuthContext'; 
+import {OrganizationSettingsPage} from './features/organizations/pages/OrganizationSettingPage';
 
 const AuthRoute = () => {
   const { user, isLoading } = useContext(AuthContext);
@@ -36,6 +37,14 @@ function App() {
                 </ProtectedRoute>
               } 
             />
+            <Route 
+            path="/organizations/:orgId/settings" 
+            element={
+              <ProtectedRoute>
+                <OrganizationSettingsPage />
+              </ProtectedRoute>
+            } 
+          />
 
             <Route 
               path="/dashboard" 

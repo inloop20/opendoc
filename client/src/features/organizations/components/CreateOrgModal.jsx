@@ -23,9 +23,7 @@ const CreateOrgModal = ({ isOpen, onClose,setOrgs }) => {
   const onSubmit = handleSubmit(async (data) => {
     
     try {
-     const org= await orgApi.createOrg(data.name);
-     console.log(org);
-     
+     const org= await orgApi.createOrg(data.name);   
       setOrgs((prev)=> [...prev,{...org.data,role:'admin',memberCount:1}])
       onClose();
     } catch (error) {

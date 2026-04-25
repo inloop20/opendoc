@@ -42,13 +42,7 @@ const OrgHeader = ({ orgName, searchQuery, onSearchChange }) => {
             />
           </div>
 
-          <button
-            onClick={() => navigate('/workspace/new')}
-            className="flex items-center gap-2 px-6 py-2 bg-primary text-white font-bold text-xs uppercase tracking-[0.2em] hover:bg-primary-hover transition-colors duration-150"
-          >
-            <PlusIcon size={16} weight="bold" />
-            New Workspace
-          </button>
+         
         </div>
       </div>
     </header>

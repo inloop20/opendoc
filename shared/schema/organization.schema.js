@@ -5,7 +5,7 @@ export const orgCreateSchema = z.object({
 });
 
 export const AddUserBodySchema = z.object({
-  emails: z.array(z.email('Invalid email format')).min(1,'at least one email is required')
+  email: z.email('Invalid email format').min(1,'at least one email is required')
 });
 
 

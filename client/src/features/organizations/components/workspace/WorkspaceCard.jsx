@@ -1,9 +1,25 @@
 import { useNavigate } from 'react-router';
 import { FolderIcon, CaretRightIcon } from '@phosphor-icons/react';
+import { useEffect, useRef } from 'react';
 
 const WorkspaceCard = ({ workspace }) => {
   const navigate = useNavigate();
 
+
+
+const formatDate = (dateString) => {
+  if (!dateString) return 'Never';
+  
+  const date = new Date(dateString);
+  
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+     hour: '2-digit',
+     minute: '2-digit',
+  }).format(date);
+};
   return (
     <button
       onClick={() => navigate(`/workspace/${workspace.id}`)}
@@ -18,12 +34,10 @@ const WorkspaceCard = ({ workspace }) => {
       <h3 className="text-lg font-semibold tracking-tight text-text-primary mb-1">{workspace.name}</h3>
       
       <div className="flex items-center gap-4 text-xs text-text-secondary">
-        <span>{workspace.folders} folders</span>
-        <span>•</span>
-        <span>{workspace.documents} docs</span>
+        <span>{workspace._count.folders} folders</span>
       </div>
       <div className="mt-4 pt-4 border-t border-border">
-        <span className="text-xs text-text-secondary">Updated {workspace.updatedAt}</span>
+        <span className="text-xs text-text-secondary">Last updated {formatDate(workspace.updated_at)}</span>
       </div>
     </button>
   );
