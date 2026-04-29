@@ -8,19 +8,16 @@ export const createDocument = asyncHandler(async (req, res) => {
   const { folderId } = req.params;
   if (!folderId) throw new ApiError("folder id is required", 400);
 
-  const { title, content } = req.body;
+  const { title } = req.body;
 
   const document = await prisma.document.create({
     data: {
       title,
-      content,
+      content:'',
       folderId,
     },
     select: {
       id: true,
-      title: true,
-      content: true,
-      folderId: true,
       created_at: true,
     },
   });
@@ -47,7 +44,6 @@ export const getDocument = asyncHandler(async (req, res) => {
     where: { id: documentId },
     select: {
       id: true,
-      folderId: true,
       title: true,
       created_at: true,
       updated_at: true,

@@ -24,7 +24,6 @@ const DocumentEditor = ({ onLogout }) => {
   const [lastSaved, setLastSaved] = useState('Just now');
   const editorRef = useRef(null);
 
-  // Mock document data
   useEffect(() => {
     if (documentId && documentId !== 'new') {
       setTitle('Introduction to OpenDoc');
@@ -46,11 +45,9 @@ const DocumentEditor = ({ onLogout }) => {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      {/* Header */}
       <header className="border-b border-border sticky top-0 bg-white z-10">
         <div className="px-8 py-4">
           <div className="flex items-center justify-between">
-            {/* Left Section */}
             <div className="flex items-center gap-4">
               <button
                 data-testid="back-to-workspace"
@@ -72,7 +69,6 @@ const DocumentEditor = ({ onLogout }) => {
               </div>
             </div>
 
-            {/* Right Section */}
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2 text-xs text-text-secondary">
                 <Clock size={14} />
@@ -98,10 +94,8 @@ const DocumentEditor = ({ onLogout }) => {
         </div>
       </header>
 
-      {/* Editor */}
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-4xl mx-auto px-8 py-12">
-          {/* Title Input */}
           <input
             data-testid="document-title-input"
             type="text"
@@ -111,7 +105,6 @@ const DocumentEditor = ({ onLogout }) => {
             placeholder="Untitled"
           />
 
-          {/* Content Editor */}
           <div
             data-testid="document-content-editor"
             ref={editorRef}
@@ -128,7 +121,6 @@ const DocumentEditor = ({ onLogout }) => {
         </div>
       </main>
 
-      {/* Floating Toolbar */}
       {showToolbar && (
         <div
           data-testid="formatting-toolbar"
@@ -143,7 +135,6 @@ const DocumentEditor = ({ onLogout }) => {
             className="p-2 hover:bg-surface transition-colors duration-150"
             title="Bold (Ctrl+B)"
           >
-            {/* <TextBolder size={18} className="text-text-primary" /> */}
           </button>
 
           <button

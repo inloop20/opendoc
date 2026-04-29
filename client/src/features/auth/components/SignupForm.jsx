@@ -7,7 +7,6 @@ import InputField from '../../../components/ui/InputField';
 import { useNavigate } from 'react-router-dom'; 
 
 const SignupForm = () => {
-  // 1. Pull BOTH register and login from your AuthContext
   const { register: signupUser, login } = useContext(AuthContext);
   const navigate = useNavigate(); 
 

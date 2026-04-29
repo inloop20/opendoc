@@ -69,12 +69,21 @@ export const getUserWorkSpace = asyncHandler(async (req, res) => {
       userId: id,
     },
      select: {
-      role:true,
+
       workspace: {
+
         select: {
+          _count:{select:{folders:true}},
           id: true,
           name: true,
           organizationId: true,
+          created_at:true,
+          updated_at:true,
+          organization:{
+            select:{
+              name:true
+            }
+          }
         },
       },
     },

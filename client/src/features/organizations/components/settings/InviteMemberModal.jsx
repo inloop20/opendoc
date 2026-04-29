@@ -26,23 +26,16 @@ const InviteMemberModal = React.memo(({ onClose, onSubmit }) => {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-[100]">
-
-      {/* BACKDROP */}
+    <div className="fixed inset-0 flex items-center justify-center z-100">
       <div
         className="absolute inset-0 bg-black/40"
         onClick={loading ? undefined : onClose}
       />
-
-      {/* MODAL */}
       <div className="relative bg-white w-full max-w-md p-6 border shadow-xl">
-
         <h2 className="text-lg font-bold mb-4">
           Invite Member
         </h2>
-
         <form onSubmit={handleSubmit} className="space-y-3">
-
           <input
             value={email}
             onChange={(e) => setEmail(e.target.value)}

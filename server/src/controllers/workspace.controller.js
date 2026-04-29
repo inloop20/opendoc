@@ -77,7 +77,7 @@ export const getWorkspaceById = asyncHandler(async (req, res) => {
   if (!id) throw new ApiError("workspace id is required", 400);
   const workspace = await prisma.workspace.findUnique({
     where: { id },
-    select: { id: true, name: true, organizationId: true, created_at: true,_count:{select:{workspace_member:true,folders:true}} },
+    select: { id: true, name: true,  created_at: true,_count:{select:{workspace_member:true,folders:true}} },
   });
   return res
     .status(200)

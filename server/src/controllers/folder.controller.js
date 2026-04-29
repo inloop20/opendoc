@@ -60,18 +60,31 @@ export const getFolders = asyncHandler(async (req, res) => {
   const { workspaceId } = req.params;
   if (!workspaceId) throw new ApiError("workspace id is required", 400);
   const folders = await prisma.folder.findMany({
-    where: { workspaceId },
+    where: { workspaceId,parentFolderId:null },
     select: {
       id: true,
       name: true,
       parentFolderId: true,
       created_at: true,
+      _count:{
+        select:{
+          subfolders:true,
+          documents:true
+        }
+      }
     },
     orderBy: {
       created_at: "asc",
     },
   });
-  return res.status(200).json(new ApiResponse(200, "folders fetched", folders));
+
+  const foldersWithHasChildren = folders.map(f => ({
+    ...f,
+    hasChildren: f._count.subfolders > 0 || f._count.documents > 0,
+    _count: undefined 
+  }));
+
+ return res.status(200).json(new ApiResponse(200, "folders fetched", foldersWithHasChildren));
 });
 
 export const updateFolder = asyncHandler(async (req, res) => {
@@ -121,7 +134,7 @@ export const getFolderContents = asyncHandler(async (req, res) => {
     select:{   
       name:true,   
       subfolders:{
-        select:{id:true,name:true,created_at:true}
+        select:{id:true,name:true,created_at:true,_count:{select:{subfolders:true,documents:true}}}
       },
       documents:{
         select:{id:true,title:true,created_at:true}
@@ -129,7 +142,18 @@ export const getFolderContents = asyncHandler(async (req, res) => {
     }
    
   });
-  return res.status(200).json(new ApiResponse(200, "Folder contents fetched", folder));
+
+  const subfoldersWithMetadata = folder.subfolders.map(sub => ({
+    ...sub,
+    hasChildren: sub._count.subfolders > 0 || sub._count.documents > 0,
+    _count: undefined
+  }));
+
+  const response = {
+    ...folder,
+    subfolders: subfoldersWithMetadata
+  };
+ return res.status(200).json(new ApiResponse(200, "Folder contents fetched", response));
 });
 
 export const moveFolder = asyncHandler(async (req, res) => {
@@ -182,7 +206,6 @@ export const shareFolder = asyncHandler(async (req, res) => {
 });
 
 
-// DELETE /folders/:folderId/share/:userId
 export const revokeFolderAccess = asyncHandler(async (req, res) => {
   const { folderId, userId } = req.params;
 

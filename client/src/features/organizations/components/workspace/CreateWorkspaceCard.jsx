@@ -60,8 +60,6 @@ const CreateWorkspaceCard = ({refreshData}) => {
           <p className="text-xs text-text-secondary mt-1">Start a new project</p>
         </div>
       </button>
-
-      {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-surface w-full max-w-md rounded-2xl border border-border shadow-2xl">

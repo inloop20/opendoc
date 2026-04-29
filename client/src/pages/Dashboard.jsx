@@ -15,7 +15,8 @@ const Dashboard = () => {
         <div className="px-8 flex gap-0 border-t border-border">
         {['workspaces','organizations'].map((tab)=>(
            <button
-          data-testid={`${tab}-tab`}
+
+          key={`${tab}-tab`}
           onClick={() => setActiveTab(tab)}
           className={`${baseTabClass} ${activeTab === tab ? 'bg-text-primary text-white' : 'bg-white text-text-secondary hover:bg-surface'}`}
         >

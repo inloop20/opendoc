@@ -32,13 +32,10 @@ const OrganizationProfileCard = React.memo(({ organization, isAdmin, onUpdateNam
 
   return (
     <div className="bg-white mb-3 shadow-sm border border-border/50 p-8 flex flex-col items-center">
-
-      {/* AVATAR */}
       <div className="w-24 h-24 rounded-full bg-primary flex items-center justify-center text-white text-3xl font-bold mb-4 shadow-inner">
         {organization?.name?.[0]?.toUpperCase()}
       </div>
 
-      {/* NAME SECTION */}
       {isEditing && isAdmin ? (
         <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-sm">
 

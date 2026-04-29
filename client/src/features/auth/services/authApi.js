@@ -8,9 +8,7 @@ export const authApi = {
         return apiClient.get('auth/logout')
     },
     getCurrentUser : async()=>{
-        return  apiClient.get('auth/me')
-      
-        
+        return  apiClient.get('auth/me')   
     },
     register : async(email,username,password)=>{
         return apiClient.post('auth/register',{email,username,password})

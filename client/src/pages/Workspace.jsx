@@ -1,97 +1,97 @@
-import { useState } from 'react';
-import { useParams } from 'react-router';
-
-
+import { useState, useEffect, useCallback } from 'react';
+import { useParams } from 'react-router-dom';
+import workspaceApi from '../features/workspace/services/workspaceApi';
 import WorkspaceSidebar from '../features/workspace/components/WorkspaceSidebar';
 import WorkspaceHeader from '../features/workspace/components/WorkspaceHeader';
-import FolderGrid from '../features/workspace/components/FolderGrid';
-import DocumentList from '../features/workspace/components/DocumentList';
-import CreateFolderModal from '../features/workspace/components/CreateFolderModal';
-import CreateDocumentModal from '../features/workspace/components/CreateDocumentModal';
+import DocumentView from '../features/workspace/components/DocumentView';
+import ErrorBanner from '../components/ui/ErrorBanner';
 
-const WorkspacePage = ({ onLogout }) => {
+const WorkspacePage = () => {
   const { workspaceId } = useParams();
   
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedFolder, setSelectedFolder] = useState(null);
-  const [showCreateFolderModal, setShowCreateFolderModal] = useState(false);
-  const [showCreateDocModal, setShowCreateDocModal] = useState(false);
+  const [workspace, setWorkspace] = useState(null);
+  const [activeDocId, setActiveDocId] = useState(null);
+  const [breadcrumbPath, setBreadcrumbPath] = useState([]);
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const workspace = { 
-    id: workspaceId, 
-    name: 'Product Documentation', 
-    org: 'Acme Corp' 
+  const fetchWorkspace = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const response = await workspaceApi.getWorkspace(workspaceId);
+      setWorkspace(response.data);
+    } catch (err) {
+      setError(err?.message || "Failed to load workspace details.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [workspaceId]);
+
+  useEffect(() => {
+    fetchWorkspace();
+  }, [fetchWorkspace]);
+
+  const handleSelectDocument = (id, path) => {
+    setActiveDocId(id);
+    setBreadcrumbPath(path);
   };
 
-  const folders = [
-    { id: 1, name: 'Getting Started', documents: 8, updatedAt: '2 hours ago' },
-    { id: 2, name: 'API Reference', documents: 15, updatedAt: '1 day ago' },
-    { id: 3, name: 'Tutorials', documents: 12, updatedAt: '3 hours ago' },
-    { id: 4, name: 'Release Notes', documents: 24, updatedAt: '5 hours ago' }
-  ];
+  const handleReset = () => {
+    setActiveDocId(null);
+    setBreadcrumbPath([]);
+  };
 
-  const documents = [
-    { id: 1, name: 'Introduction to OpenDoc', folderId: 1, updatedAt: '1 hour ago', author: 'John Doe' },
-    { id: 2, name: 'Installation Guide', folderId: 1, updatedAt: '2 hours ago', author: 'Jane Smith' },
-    { id: 3, name: 'Quick Start Tutorial', folderId: 1, updatedAt: '3 hours ago', author: 'John Doe' }
-  ];
+  if (isLoading) {
+    return (
+      <div className="h-screen w-full flex items-center justify-center bg-white">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      </div>
+    );
+  }
 
-  // Derived State
-  const displayedDocuments = selectedFolder
-    ? documents.filter(doc => doc.folderId === selectedFolder)
-    : documents;
+  if (error) {
+    return (
+      <div className="h-screen w-full p-10 flex items-center justify-center">
+        <ErrorBanner message={error} onRetry={fetchWorkspace} />
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-white flex">
-      {/* 1. Sidebar */}
+    <div className="flex h-screen w-full bg-white overflow-hidden">
+    
       <WorkspaceSidebar 
         workspace={workspace}
-        folders={folders}
-        selectedFolder={selectedFolder}
-        onSelectFolder={setSelectedFolder}
-        onCreateFolderClick={() => setShowCreateFolderModal(true)}
-        onLogout={onLogout}
+        onSelectDocument={handleSelectDocument}
+        onReset={handleReset}
       />
 
-      <div className="flex-1 flex flex-col">
-        {/* 2. Header */}
+      <div className="flex-1 flex flex-col min-w-0 h-full">
+       
         <WorkspaceHeader 
-          workspace={workspace}
-          folders={folders}
-          selectedFolder={selectedFolder}
+          path={breadcrumbPath} 
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
-          onCreateFolder={() => setShowCreateFolderModal(true)}
-          onCreateDoc={() => setShowCreateDocModal(true)}
         />
-
-        {/* 3. Main Content Area */}
-        <main className="flex-1 p-8 overflow-y-auto">
-          {!selectedFolder && (
-            <FolderGrid 
-              folders={folders} 
-              onSelectFolder={setSelectedFolder} 
-            />
+        
+      
+        <main 
+          className="flex-1 overflow-y-auto bg-white relative"
+          onClick={handleReset}
+        >
+          {activeDocId ? (
+            <div className="h-full" onClick={(e) => e.stopPropagation()}>
+              <DocumentView docId={activeDocId} />
+            </div>
+          ) : (
+            <div className="h-full flex items-center justify-center text-text-secondary select-none italic">
+              Select a file from the explorer to begin
+            </div>
           )}
-
-          <DocumentList 
-            documents={displayedDocuments} 
-            selectedFolder={selectedFolder}
-            onCreateDoc={() => setShowCreateDocModal(true)}
-          />
         </main>
       </div>
-
-      {/* 4. Feature Modals */}
-      {showCreateFolderModal && (
-        <CreateFolderModal onClose={() => setShowCreateFolderModal(false)} />
-      )}
-      {showCreateDocModal && (
-        <CreateDocumentModal 
-          folders={folders} 
-          onClose={() => setShowCreateDocModal(false)} 
-        />
-      )}
     </div>
   );
 };

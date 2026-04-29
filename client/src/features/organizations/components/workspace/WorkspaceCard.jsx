@@ -3,9 +3,7 @@ import { FolderIcon, CaretRightIcon } from '@phosphor-icons/react';
 import { useEffect, useRef } from 'react';
 
 const WorkspaceCard = ({ workspace }) => {
-  const navigate = useNavigate();
-
-
+const navigate = useNavigate();
 
 const formatDate = (dateString) => {
   if (!dateString) return 'Never';

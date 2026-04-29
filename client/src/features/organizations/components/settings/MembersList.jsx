@@ -12,7 +12,7 @@ const MembersList = React.memo(({
   return (
     <div className="bg-white mb-3 shadow-sm border border-border/50">
 
-      {/* HEADER */}
+    
       <div className="px-4 py-3 flex items-center justify-between border-b border-border/40">
         <span className="text-[12px] font-bold uppercase tracking-[0.15em] text-primary">
           Members
@@ -28,7 +28,6 @@ const MembersList = React.memo(({
         )}
       </div>
 
-      {/* LIST */}
       <div className="divide-y divide-border/30">
         {members.map((m) => (
           <MemberRow
