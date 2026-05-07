@@ -9,6 +9,7 @@ const MembersList = React.memo(({
   onRemove,
   onInvite
 }) => {
+  
   return (
     <div className="bg-white mb-3 shadow-sm border border-border/50">
 

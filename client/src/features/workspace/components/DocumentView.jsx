@@ -1,20 +1,32 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Lock, ChatTeardropText, PaperPlaneRight, UserCircle, CircleNotch, Clock, Calendar } from "@phosphor-icons/react";
+import { Lock, ChatTeardropText, CircleNotch, Clock, Calendar, PencilSimple, FloppyDisk, X
+} from "@phosphor-icons/react";
 import workspaceApi from '../services/workspaceApi';
 import ErrorBanner from '../../../components/ui/ErrorBanner';
+import DocumentComments from './DocumentComments';
 
 const DocumentView = ({ docId }) => {
   const [docData, setDocData] = useState(null);
+  const [permissions, setPermissions] = useState({ canEdit: false });
   const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [contentDraft, setContentDraft] = useState("");
+  const [showComments, setShowComments] = useState(false);
 
   const fetchDocument = useCallback(async () => {
     if (!docId) return;
     try {
       setIsLoading(true);
       setError(null);
-      const response = await workspaceApi.getDocument(docId);
-      setDocData(response.data);
+      const [documentRes, permissionsRes] = await Promise.all([
+        workspaceApi.getDocument(docId),
+        workspaceApi.getDocumentPermissions(docId),
+      ]);
+      setDocData(documentRes.data);
+      setPermissions(permissionsRes.data);
+      setContentDraft(documentRes.data?.content || "");
     } catch (err) {
       setError(err?.response?.data?.message || err.message || "Failed to load document.");
     } finally {
@@ -25,6 +37,21 @@ const DocumentView = ({ docId }) => {
   useEffect(() => {
     fetchDocument();
   }, [fetchDocument]);
+
+  const handleSave = async () => {
+    try {
+      setIsSaving(true);
+      const res = await workspaceApi.updateDocument(docId, {
+        content: contentDraft,
+      });
+      setDocData(res.data);
+      setIsEditing(false);
+    } catch (err) {
+      setError(err?.response?.data?.message || err.message || "Failed to save document.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
@@ -38,10 +65,7 @@ const DocumentView = ({ docId }) => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full w-full bg-white">
-        <div className="flex flex-col items-center gap-3">
-          <CircleNotch size={32} className="animate-spin text-primary" />
-          <p className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">Syncing Document...</p>
-        </div>
+        <CircleNotch size={32} className="animate-spin text-primary" />
       </div>
     );
   }
@@ -57,86 +81,96 @@ const DocumentView = ({ docId }) => {
   if (!docData) return null;
 
   return (
-    <div className="flex h-full w-full overflow-hidden bg-white">
+    <div className="flex h-full w-full bg-white relative">
       <div className="flex-1 flex flex-col min-w-0 border-r border-border">
         <div className="p-8 md:p-16 overflow-y-auto h-full max-w-4xl mx-auto w-full">
-          
+
           <div className="flex items-start justify-between mb-10 pb-6 border-b border-border">
-            <div className="space-y-3">
-              <h1 className="text-4xl font-bold text-text-primary font-heading tracking-tight">
-                {docData.title}
-              </h1>
-              
-              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[11px] font-medium uppercase tracking-wider text-text-secondary">
-                <div className="flex items-center gap-1.5">
-                  <Calendar size={14} className="text-text-tertiary" />
-                  <span>Created: <span className="text-text-primary">{formatDate(docData.created_at)}</span></span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <Clock size={14} className="text-text-tertiary" />
-                  <span>Updated: <span className="text-text-primary">{formatDate(docData.updated_at)}</span></span>
-                </div>
+            <div>
+              <h1 className="text-4xl font-bold">{docData.title}</h1>
+
+              <div className="flex gap-6 mt-2 text-xs uppercase text-text-secondary">
+                <span>
+                  <Calendar size={12} /> {formatDate(docData.created_at)}
+                </span>
+                <span>
+                  <Clock size={12} /> {formatDate(docData.updated_at)}
+                </span>
+
               </div>
             </div>
-            
-            {!docData.canEdit && (
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-surface border border-border text-[10px] font-bold text-text-secondary rounded uppercase tracking-widest">
-                <Lock size={12} weight="bold" />
-                Read Only
-              </div>
-            )}
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowComments(true)}
+                className="px-3 py-1.5 border border-border text-xs font-bold uppercase flex items-center gap-2"
+              >
+                <ChatTeardropText size={14} />
+                Comments
+              </button>
+
+              {permissions.canEdit && (
+                !isEditing ? (
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="px-3 py-1.5 bg-black text-white text-xs font-bold uppercase flex items-center gap-2"
+                  >
+                    <PencilSimple size={14} />
+                    Edit
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => {
+                        setIsEditing(false);
+                        setContentDraft(docData.content);
+                      }}
+                      className="px-3 py-1.5 border text-xs font-bold uppercase flex items-center gap-2"
+                    >
+                      <X size={14} />
+                      Cancel
+                    </button>
+
+                    <button
+                      onClick={handleSave}
+                      disabled={isSaving}
+                      className="px-3 py-1.5 bg-green-600 text-white text-xs font-bold uppercase flex items-center gap-2"
+                    >
+                      {isSaving ? (
+                        <CircleNotch size={14} className="animate-spin" />
+                      ) : (
+                        <FloppyDisk size={14} />
+                      )}
+                      Save
+                    </button>
+                  </>
+                )
+              )}
+            </div>
           </div>
 
-          <div 
-            className="prose prose-slate max-w-none focus:outline-none min-h-125 text-text-primary leading-relaxed"
-            contentEditable={docData.canEdit}
-            suppressContentEditableWarning={true}
-            dangerouslySetInnerHTML={{ __html: docData.content }}
-          />
-        </div>
-      </div>
-
-      <aside className="w-80 flex flex-col bg-surface shrink-0">
-        <div className="p-4 border-b border-border flex items-center gap-2 font-bold text-[10px] uppercase tracking-[0.2em] text-text-primary bg-white">
-          <ChatTeardropText size={18} />
-          Discussion
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-4 space-y-6">
-          {docData.comments?.length > 0 ? (
-            docData.comments.map(comment => (
-              <div key={comment.id} className="flex gap-3">
-                <UserCircle size={24} className="text-text-tertiary shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-[11px] font-bold text-text-primary truncate">{comment.user}</span>
-                    <span className="text-[9px] text-text-tertiary uppercase">{comment.time}</span>
-                  </div>
-                  <p className="text-sm text-text-secondary leading-snug bg-white p-3 border border-border rounded-sm shadow-sm">
-                    {comment.text}
-                  </p>
-                </div>
-              </div>
-            ))
+          {isEditing ? (
+            <textarea
+              value={contentDraft}
+              onChange={(e) => setContentDraft(e.target.value)}
+              className="w-full min-h-125 border p-4 text-sm"
+            />
           ) : (
-            <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-2">
-              <ChatTeardropText size={32} className="text-border" />
-              <p className="text-xs text-text-tertiary italic">No comments yet.</p>
-            </div>
+            <div dangerouslySetInnerHTML={{ __html: docData.content }} />
           )}
         </div>
-        <div className="p-4 bg-white border-t border-border">
-          <div className="relative group">
-            <textarea 
-              placeholder="Write a response..."
-              className="w-full text-sm border border-border p-3 pr-10 outline-none focus:border-borderStrong focus:ring-0 resize-none min-h-25 transition-all placeholder:text-text-tertiary bg-surface/30 focus:bg-white"
-            />
-            <button className="absolute bottom-3 right-3 text-primary hover:scale-110 transition-transform">
-              <PaperPlaneRight size={20} weight="fill" />
-            </button>
-          </div>
+      </div>
+      {showComments && (
+        <div
+          onClick={() => setShowComments(false)}
+          className="fixed inset-0 bg-black/10 z-40"
+        />
+      )}
+      {showComments && (
+        <div className="fixed right-0 top-0 h-full w-80 bg-white border-l z-50 shadow-xl">
+          <DocumentComments docId={docId} />
         </div>
-      </aside>
+      )}
     </div>
   );
 };

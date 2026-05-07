@@ -1,144 +1,92 @@
-import { useState, useEffect } from 'react';
-import { FolderPlus, FilePlus, Plus } from "@phosphor-icons/react";
-import workspaceApi from '../services/workspaceApi';
+import { useEffect, useState } from "react";
+import { FolderPlus, FilePlus, Gear } from "@phosphor-icons/react";
+import { useNavigate } from "react-router-dom";
 import Sidebar from "../../../components/ui/Sidebar.jsx";
+import ErrorBanner from "../../../components/ui/ErrorBanner.jsx"; 
 import ExplorerTree from "./ExplorerTree";
 import CreateDocumentModal from "./CreateDocumentModal";
 import CreateFolderModal from "./CreateFolderModal";
+import { useWorkspace } from "../context/WorkspaceContext";
 
-const WorkspaceSidebar = ({ workspace, onSelectDocument, onReset }) => {
-  const [folders, setFolders] = useState([]);
+const WorkspaceSidebar = ({ workspace, onSelectDocument }) => {
+  const { nodes, rootIds, loadExplorer, addFolder, addDocument, error, clearError } = useWorkspace();
+
   const [selectedId, setSelectedId] = useState(null);
-  
-  const [showDocModal, setShowDocModal] = useState(false);
-  const [showFolderModal, setShowFolderModal] = useState(false);
+  const [lastSelectedFolderId, setLastSelectedFolderId] = useState(null);
+  const [docModal, setDocModal] = useState(false);
+  const [folderModal, setFolderModal] = useState(false);
 
-  const loadExplorer = async () => {
-    if (!workspace?.id) return;
-    try {
-      const response = await workspaceApi.getFolders(workspace.id);
-      setFolders(response.data || []);
-    } catch (err) {
-      console.error("Explorer sync failed:", err);
-    }
-  };
+  const navigate = useNavigate();
 
   useEffect(() => {
-    loadExplorer();
-  }, [workspace?.id]);
-
-  const handleExpandFolder = async (folderId) => {
-    try {
-      const response = await workspaceApi.getFolderContent(folderId);
-      const data = response.data;
-
-      const updateRecursive = (list) => list.map(node => {
-        if (node.id === folderId) {
-          return { 
-            ...node, 
-            subfolders: data.subfolders || [], 
-            documents: data.documents || [] 
-          };
-        }
-        if (node.subfolders) {
-          return { ...node, subfolders: updateRecursive(node.subfolders) };
-        }
-        return node;
-      });
-
-      setFolders(prev => updateRecursive(prev));
-    } catch (err) {
-      console.error("Folder expansion failed:", err);
-    }
-  };
-
-  const findPathNames = (nodes, targetId, currentPath = []) => {
-    for (const node of nodes) {
-      const name = node.name || node.title;
-      const newPath = [...currentPath, name];
-      if (node.id === targetId) return newPath;
-      
-      const children = [...(node.subfolders || []), ...(node.documents || [])];
-      const found = findPathNames(children, targetId, newPath);
-      if (found) return found;
-    }
-    return null;
-  };
+    if (workspace?.id) loadExplorer(workspace.id);
+  }, [workspace?.id, loadExplorer]);
 
   const handleSelect = (id, isFolder) => {
     setSelectedId(id);
-    if (!isFolder) {
-      const path = findPathNames(folders, id);
-      onSelectDocument(id, path || []);
+    if (isFolder) {
+      setLastSelectedFolderId(id);
+    } else if (onSelectDocument) {
+      const doc = nodes[id];
+      onSelectDocument(id, [doc?.title || doc?.name]);
     }
   };
-
+  
   return (
-    <Sidebar 
-      headerTitle={workspace?.name} 
-      memberCount={workspace?._count?.workspace_member}
-    >
-      <div className="flex flex-col h-full" onClick={onReset}>
-        <div className="flex items-center justify-between px-4 py-2 mt-4 mb-1" onClick={(e) => e.stopPropagation()}>
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-text-secondary">Explorer</p>
-        
-          <div className="flex gap-1">
-            <button 
-              onClick={() => setShowFolderModal(true)}
-              className="p-1 hover:bg-surfaceHover text-text-secondary rounded transition-colors"
-              title="New Folder"
-            >
-              <FolderPlus size={14} />
-            </button>
-            <button 
-              onClick={() => setShowDocModal(true)}
-              className="p-1 hover:bg-surfaceHover text-text-secondary rounded transition-colors"
-              title="New Document"
-            >
-              <FilePlus size={14} />
-            </button>
-          </div>
+    <Sidebar headerTitle={workspace?.name} memberCount={workspace?.counts?.workspace_member}>
+      {error && (
+        <div className="px-2 pt-2">
+          <ErrorBanner message={error} onClose={clearError} />
         </div>
+      )}
 
-        <div className="flex-1 overflow-y-auto px-2 pt-1" onClick={(e) => e.stopPropagation()}>
-          { 
-            folders.map(folder => (
-              <ExplorerTree 
-                key={folder.id} 
-                item={folder} 
-                selectedId={selectedId}
-                onSelect={handleSelect}
-                onExpandFolder={handleExpandFolder}
-              />
-            ))
-          }
-        </div>
-        <div className="h-10 shrink-0" />
+      <div className="border-b border-gray-200 px-3 py-2">
+        <button
+          onClick={() => navigate(`/workspace/${workspace?.id}/settings`)}
+          className="w-full flex items-center gap-2 px-2 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-md transition group"
+        >
+          <Gear size={16} className="transition-transform group-hover:rotate-45" />
+          <span className="font-medium">Workspace Settings</span>
+        </button>
       </div>
 
-    
-      
-      {showFolderModal && (
-        <CreateFolderModal 
-          workspaceId={workspace.id}
-          parentId={selectedId} 
-          onClose={() => setShowFolderModal(false)}
-          onSuccess={() => {
-            loadExplorer(); 
-            setShowFolderModal(false);
-          }}
+      <div className="flex items-center justify-between px-4 py-3 mt-2">
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500">Explorer</p>
+        <div className="flex gap-1">
+          <button onClick={(e) => { e.stopPropagation(); setFolderModal(true); }} className="p-1.5 rounded hover:bg-gray-100 text-gray-500" title="New Folder">
+            <FolderPlus size={14} />
+          </button>
+          <button onClick={(e) => { e.stopPropagation(); setDocModal(true); }} className="p-1.5 rounded hover:bg-gray-100 text-gray-500" title="New Document">
+            <FilePlus size={14} />
+          </button>
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto px-2 pb-4" onClick={() => { setSelectedId(null); setLastSelectedFolderId(null); }}>
+        {rootIds.length === 0 ? (
+          <div className="text-xs text-gray-400 px-3 py-2 italic">No folders yet</div>
+        ) : (
+          rootIds.map((id) => (
+            <ExplorerTree key={id} itemId={id} parentId={null} selectedId={selectedId} onSelect={handleSelect} />
+          ))
+        )}
+      </div>
+
+      {folderModal && (
+        <CreateFolderModal
+          workspaceId={workspace?.id}
+          parentId={lastSelectedFolderId}
+          onClose={() => setFolderModal(false)}
+          onSuccess={(folder) => { addFolder(folder, lastSelectedFolderId); setFolderModal(false); }}
         />
       )}
 
-      {showDocModal && (
-        <CreateDocumentModal 
-          workspaceId={workspace.id}
-          parentId={selectedId} 
-          onClose={() => setShowDocModal(false)}
-          onSuccess={() => {
-            loadExplorer();
-            setShowDocModal(false);
-          }}
+      {docModal && (
+        <CreateDocumentModal
+          workspaceId={workspace?.id}
+          parentId={lastSelectedFolderId}
+          onClose={() => setDocModal(false)}
+          onSuccess={(doc) => { addDocument(doc, lastSelectedFolderId); setDocModal(false); }}
         />
       )}
     </Sidebar>

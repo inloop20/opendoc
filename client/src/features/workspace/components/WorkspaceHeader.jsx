@@ -1,30 +1,8 @@
 import { MagnifyingGlass, CaretRight } from "@phosphor-icons/react";
 
-const WorkspaceHeader = ({ path = [], searchQuery, onSearchChange }) => {
+const WorkspaceHeader = ({searchQuery, onSearchChange }) => {
   return (
     <header className="h-14 border-b border-border flex items-center justify-between px-6 bg-white shrink-0">
-      <div className="flex items-center gap-2 overflow-hidden">
-        <div className="flex items-center text-sm font-medium text-text-secondary whitespace-nowrap">
-          {path.length === 0 && <span className="text-text-tertiary">Select a document</span>}
-          
-          {path.map((name, index) => (
-            <div key={index} className="flex items-center">
-              <span 
-                className={`transition-colors cursor-default ${
-                  index === path.length - 1 
-                    ? "text-text-primary font-bold" 
-                    : "hover:text-primary"
-                }`}
-              >
-                {name}
-              </span>
-              {index < path.length - 1 && (
-                <CaretRight size={12} className="mx-2 text-borderStrong" weight="bold" />
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
       <div className="flex-1 max-w-md ml-8">
         <div className="relative group">
           <MagnifyingGlass 

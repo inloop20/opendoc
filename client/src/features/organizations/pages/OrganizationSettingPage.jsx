@@ -1,4 +1,4 @@
-import { OrganizationSettings } from '../components/settings/OrganizationSettings'
+import { OrganizationSettings } from '../components/OrganizationSettings'
 export const OrganizationSettingsPage = () => {
   return (
     <OrganizationSettings />

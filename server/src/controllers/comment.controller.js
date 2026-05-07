@@ -29,7 +29,7 @@ export const createComment = asyncHandler(async (req, res) => {
   await fgaClient.write({
     writes: [{
         user: `user:${req.user.id}`,
-        relation: "owner",
+        relation: "editor",
         object: `comment:${comment.id}`,
       },
       {

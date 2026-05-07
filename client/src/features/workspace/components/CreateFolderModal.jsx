@@ -23,17 +23,25 @@ const CreateFolderModal = ({ workspaceId, parentId, onClose, onSuccess }) => {
       setIsSubmitting(true);
       setApiError(null);
       
-      await workspaceApi.createFolder(
+    const res = await workspaceApi.createFolder(
         workspaceId,
         parentId, 
         data.name
       );
+      const folder = {
+      ...res.data,
+      subfolders: [],
+      documents: [],
+      hasChildren: false,  
+      loaded: true,
+};
+      onSuccess(folder); 
 
-      onSuccess(); 
     } catch (err) {
       setApiError(err?.message || "An unexpected error occurred while creating the folder.");
     } finally {
       setIsSubmitting(false);
+      onClose()
     }
   };
 

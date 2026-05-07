@@ -2,7 +2,7 @@ import { ArrowLeft } from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
 import React from "react";
 
-const OrganizationHeader = React.memo(({ organization, membersCount }) => {
+const Header = React.memo(({ name, membersCount }) => {
   const navigate = useNavigate();
 
   return (
@@ -14,11 +14,11 @@ const OrganizationHeader = React.memo(({ organization, membersCount }) => {
       <div>
         <div className="font-bold">Settings</div>
         <div className="text-xs text-gray-500">
-          {organization?.name} • {membersCount} members
+          {name} • {membersCount} members
         </div>
       </div>
     </div>
   );
 });
 
-export default OrganizationHeader;
+export default Header;

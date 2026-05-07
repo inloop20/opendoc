@@ -6,6 +6,7 @@ import {
   getMembers,
   getMyWorkspaces,
   getWorkspaceById,
+  leaveWorkspace,
   removeMember,
   updateMemberRole,
   updateWorkspace,
@@ -51,6 +52,11 @@ workspaceRouter.delete(
   checkPermission("admin", "workspace", "id"),
   removeMember,
 );
+workspaceRouter.delete(
+  "/:id/leave",
+  checkPermission("member", "workspace", "id"),
+  leaveWorkspace,
+);
 
 workspaceRouter.get(
   "/:id",
@@ -70,5 +76,11 @@ workspaceRouter.delete(
   checkPermission("admin", "workspace", "id"),
   deleteWorkspace,
 );
+
+// workspaceRouter.get(
+//   "/:id/permissions",
+//   checkPermission("member", "workspace", "id"),
+//   getWorkspacePermissions
+// );
 
 export default workspaceRouter

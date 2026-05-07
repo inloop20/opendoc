@@ -32,7 +32,7 @@ const formatDate = (dateString) => {
       <h3 className="text-lg font-semibold tracking-tight text-text-primary mb-1">{workspace.name}</h3>
       
       <div className="flex items-center gap-4 text-xs text-text-secondary">
-        <span>{workspace._count.folders} folders</span>
+        <span>{workspace?._count?.folders} folders</span>
       </div>
       <div className="mt-4 pt-4 border-t border-border">
         <span className="text-xs text-text-secondary">Last updated {formatDate(workspace.updated_at)}</span>

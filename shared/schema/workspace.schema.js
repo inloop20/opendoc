@@ -4,7 +4,7 @@ export const nameSchema = z.object({
     name: z
       .string()
       .trim()
-      .min(1, "Workspace name is required")
+      .min(3, "Workspace name must not be lower than 3 characters")
       .transform((val) => val.toLowerCase()),
 });
 
@@ -16,5 +16,5 @@ export const UpdateMemberRoleSchema = z.object({
 });
 
 export const addMemberSchema = z.object({
-  userId : z.uuid('userId is required'),
+  email : z.email('email is required'),
 })

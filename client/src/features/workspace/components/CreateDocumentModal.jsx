@@ -27,16 +27,17 @@ const CreateDocumentModal = ({ workspaceId, parentId, onClose, onSuccess }) => {
       setIsSubmitting(true);
       setApiError(null);
 
-      await workspaceApi.createDocument(
+     const doc= await workspaceApi.createDocument(
         parentId,
         data.title,
       );
 
-      onSuccess(); 
+      onSuccess(doc.data,parentId); 
     } catch (err) {
       setApiError(err?.message || "Failed to create document.");
     } finally {
       setIsSubmitting(false);
+      onClose()
     }
   };
 

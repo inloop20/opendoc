@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { orgCreateSchema } from "@open-doc/shared";
+import { nameSchema } from "@open-doc/shared";
 
 import { Check, X, PencilSimple } from "@phosphor-icons/react";
 
-const OrganizationProfileCard = React.memo(({ organization, isAdmin, onUpdateName }) => {
+const ProfileCard = React.memo(({ name, isAdmin, onUpdateName }) => {
   const [isEditing, setIsEditing] = useState(false);
 
   const {
@@ -14,9 +14,9 @@ const OrganizationProfileCard = React.memo(({ organization, isAdmin, onUpdateNam
     reset,
     formState: { isDirty, errors, isSubmitting }
   } = useForm({
-    resolver: zodResolver(orgCreateSchema),
+  resolver: zodResolver(nameSchema),
     defaultValues: {
-      name: organization?.name || ""
+      name: name || ""
     }
   });
 
@@ -26,14 +26,14 @@ const OrganizationProfileCard = React.memo(({ organization, isAdmin, onUpdateNam
   };
 
   const onCancel = () => {
-    reset({ name: organization.name });
+    reset({ name });
     setIsEditing(false);
   };
 
   return (
     <div className="bg-white mb-3 shadow-sm border border-border/50 p-8 flex flex-col items-center">
       <div className="w-24 h-24 rounded-full bg-primary flex items-center justify-center text-white text-3xl font-bold mb-4 shadow-inner">
-        {organization?.name?.[0]?.toUpperCase()}
+        {name?.[0]?.toUpperCase()}
       </div>
 
       {isEditing && isAdmin ? (
@@ -76,7 +76,7 @@ const OrganizationProfileCard = React.memo(({ organization, isAdmin, onUpdateNam
         <div className="flex items-center gap-3">
 
           <h2 className="text-xl font-medium tracking-tight">
-            {organization.name}
+            {name}
           </h2>
 
           {isAdmin && (
@@ -95,4 +95,4 @@ const OrganizationProfileCard = React.memo(({ organization, isAdmin, onUpdateNam
   );
 });
 
-export default OrganizationProfileCard;
+export default ProfileCard;

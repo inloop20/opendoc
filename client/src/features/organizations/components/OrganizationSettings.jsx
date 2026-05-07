@@ -1,15 +1,15 @@
 import React, { useEffect, useState, useCallback, useContext } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { orgWorkspaceApi } from "../../services/orgWorkspaceApi";
-import { orgApi } from "../../services/orgApi";
-import { AuthContext } from "../../../auth/context/AuthContext";
-import { useOrgPermissions } from "../../hooks/useOrgPermission";
+import { orgWorkspaceApi } from "../services/orgWorkspaceApi";
+import { orgApi } from "../services/orgApi";
+import { AuthContext } from "../../auth/context/AuthContext";
+import { useOrgPermissions } from "../hooks/useOrgPermission";
 
-import OrganizationHeader from "./OrganizationHeader";
-import OrganizationProfileCard from "./OrganizationProfileCard";
-import MembersList from "./MembersList";
-import InviteMemberModal from "./InviteMemberModal";
-import ConfirmationModal from "../../../../components/ConfirmationModal";
+import Header from "../../settings/components/Header";
+import ProfileCard from "../../settings/components/ProfileCard";
+import MembersList from "../../settings/components/MembersList";
+import InviteModal from "../../settings/components/InviteMemberModal";
+import ConfirmationModal from "../../../components/ConfirmationModal";
 import { SignOutIcon, TrashIcon } from "@phosphor-icons/react";
 
 export const OrganizationSettings = () => {
@@ -118,16 +118,16 @@ export const OrganizationSettings = () => {
   return (
     <div className="h-full flex flex-col">
 
-      <OrganizationHeader
-        organization={organization}
-        membersCount={members.length}
+      <Header
+        name={organization?.name}
+        membersCount={members?.length}
       />
 
       <div className="flex-1 overflow-y-auto bg-[#f0f2f5]">
         <div className="max-w-2xl mx-auto py-6 px-4">
 
-          <OrganizationProfileCard
-            organization={organization}
+          <ProfileCard
+            name={organization?.name}
             isAdmin={isAdmin}
             onUpdateName={updateName}
           />
@@ -190,7 +190,7 @@ export const OrganizationSettings = () => {
       </div>
 
       {inviteOpen && (
-        <InviteMemberModal
+        <InviteModal
           onClose={() => setInviteOpen(false)}
           onSubmit={inviteMember}
         />

@@ -1,5 +1,5 @@
 import express from 'express';
-import { createDocument, deleteDocument, getDocument, revokeDocAccess, shareDocument, updateDocument } from '../controllers/document.controller.js';
+import { createDocument, deleteDocument, getDocument, getDocumentPermissions, revokeDocAccess, shareDocument, updateDocument } from '../controllers/document.controller.js';
 import validate from '../middleware/validate.middleware.js';
 import {createDocumentSchema, memberSchema, updateDocumentSchema} from '../../../shared/index.js'
 import { createComment, getComments } from '../controllers/comment.controller.js';
@@ -52,6 +52,11 @@ documentRouter.delete(
   "/:documentId",
   checkPermission("editor", "document", "documentId"),
   deleteDocument
+);
+
+documentRouter.get(
+  "/:documentId/permissions",
+  getDocumentPermissions
 );
 
 export default documentRouter;

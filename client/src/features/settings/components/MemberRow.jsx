@@ -9,7 +9,6 @@ const MemberRow = React.memo(({
   onRemove
 }) => {
   const [open, setOpen] = useState(false);
-
   return (
     <div className="flex items-center gap-4 px-4 py-4 relative hover:bg-surface-secondary/20">
 
